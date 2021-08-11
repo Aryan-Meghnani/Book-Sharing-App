@@ -1,21 +1,19 @@
-import sun.rmi.runtime.Log;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class BookManager implements BookService,Runnable {
+public class BookManager implements BookService, Runnable {
 
-    LocalDateTime date = LocalDateTime.now();
+
+    LocalDateTime date;
     private List<BookAndOwner> bookAndOwners = new ArrayList<>();
     private List<Member> members = new ArrayList<>();
-    private List<BookIssue> bookIssues= new ArrayList<>();
+    private List<BookIssue> bookIssues = new ArrayList<>();
     private PriorityQueue<BookRequest> bookRequests = new PriorityQueue<>();
-    private List<BookAndOwner> bookAndOwnerFilter= new ArrayList<>();
+    private List<BookAndOwner> bookAndOwnerFilter = new ArrayList<>();
 
     public BookManager() {
         members.add(new Member("Aryan", 101));
@@ -30,7 +28,6 @@ public class BookManager implements BookService,Runnable {
         bookAndOwners.add(new BookAndOwner(new Books("Ngaio Marsh", "Death on the Air", "1-86092-020-9"), members.get(2), 5));
         bookAndOwners.add(new BookAndOwner(new Books("Ngaio Marsh", "Death on the Air", "1-86092-020-9"), members.get(1), 5));
     }
-
 
     public List<Member> getMembers() {
         return members;
@@ -57,12 +54,9 @@ public class BookManager implements BookService,Runnable {
     public List<BookAndOwner> search(int p, String search) {
 
         if (p == 1) {
-
-//            Matcher check = Pattern.compile(Pattern.quote(bookAndOwner.get(0).getBooks().getBook()), Pattern.CASE_INSENSITIVE).matcher(search);
             bookAndOwnerFilter = bookAndOwners.stream().filter(i -> i.getBooks().getBook().toLowerCase().contains(search.toLowerCase())).collect(Collectors.toList());
         } else if (p == 2) {
             bookAndOwnerFilter = bookAndOwners.stream().filter(i -> i.getBooks().getAuthor().toLowerCase().contains(search.toLowerCase())).collect(Collectors.toList());
-
         } else if (p == 3) {
             bookAndOwnerFilter = bookAndOwners.stream().filter(i -> i.getBooks().getIsbn().contains(search)).collect(Collectors.toList());
         }
@@ -73,17 +67,15 @@ public class BookManager implements BookService,Runnable {
     //and book will be issue to requested else book will be issued
     public String issue(int bookAndOwnerFilterIndex, Member member) {
         //bookAndOwnerFilterIndex to get the index of book to be issued and bookAndOwner1 is filtered list of bookAndOwner
-
+        date = LocalDateTime.now();
         IssueReturnDate issueReturnDate = new IssueReturnDate();
         int index = bookAndOwners.indexOf(bookAndOwnerFilter.get(bookAndOwnerFilterIndex));
         int copy = bookAndOwners.get(index).getCopies();
         if (copy <= 0) {
-//                if(bookAndOwner.contains(bookAndOwner1.get(k).getBooks()))
             issueReturnDate.setStatus("Requested");
             issueReturnDate.setRequestDate(date);
             bookIssues.add(new BookIssue(bookAndOwnerFilter.get(bookAndOwnerFilterIndex), member, issueReturnDate));
             bookRequests.add(new BookRequest(bookAndOwnerFilter.get(bookAndOwnerFilterIndex), member, date));
-
             return "Not Enough Copies to Issue, Your Request hase been added";
         } else {
             issueReturnDate.setStatus("Issued");
@@ -100,7 +92,7 @@ public class BookManager implements BookService,Runnable {
     }
 
     public String bookReturn(List<BookIssue> bookIssueFilter, int bookIssueFilterIndex) {
-
+        date = LocalDateTime.now();
         int index = bookIssues.indexOf(bookIssueFilter.get(bookIssueFilterIndex));
         bookIssues.get(index).issueReturnDate.setStatus("Returned");
         bookIssues.get(index).issueReturnDate.setReturnDate(date);
@@ -109,22 +101,24 @@ public class BookManager implements BookService,Runnable {
         int copy = bookAndOwners.get(indexBookAndOwner).getCopies();
 
         bookAndOwners.get(indexBookAndOwner).setCopies(copy + 1);
-
-
         return "Book Returned Successfully";
-
     }
 
     @Override
     public void run() {
-        System.out.println("runnnnnning");
-//        int index = bookAndOwners.indexOf(bookRequests.peek().getBookAndOwner());
-//        System.out.println(""+index);
-//        int copy = bookAndOwners.get(index).getCopies();
-//        System.out.println(copy);
-//        if(copy>0){
-//            System.out.println("Available");
-//        }
-//
+        int index = bookAndOwners.indexOf(bookRequests.peek().getBookAndOwner());
+        int copy = bookAndOwners.get(index).getCopies();
+        if (copy > 0) {
+            date = LocalDateTime.now();
+            System.out.println("\nBook = (" + bookAndOwners.get(index) + " \nis available for Request Made by " + bookRequests.peek().getMember() + ")");
+            IssueReturnDate issueReturnDate = new IssueReturnDate();
+            System.out.println("Book Issued to " + bookRequests.peek().getMember() + "\n");
+            int bookIssueIndex = bookIssues.indexOf(new BookIssue(bookRequests.peek().getBookAndOwner(), bookRequests.peek().getMember(), issueReturnDate));
+            int copies = bookAndOwners.get(index).getCopies();
+            bookAndOwners.get(index).setCopies(copies - 1);
+            bookIssues.get(bookIssueIndex).getIssueReturnDate().setIssueDate(date);
+            bookIssues.get(bookIssueIndex).getIssueReturnDate().setIssueDate(date);
+            bookRequests.poll();
+        }
     }
 }

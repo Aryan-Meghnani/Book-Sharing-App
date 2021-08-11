@@ -39,7 +39,7 @@ public class BookIssue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BookIssue bookIssue = (BookIssue) o;
-        return Objects.equals(bookAndOwner, bookIssue.bookAndOwner) && Objects.equals(member, bookIssue.member) && issueReturnDate.getStatus() == "Requested";
+        return Objects.equals(bookAndOwner, bookIssue.bookAndOwner) && Objects.equals(member, bookIssue.member);
     }
 
     @Override

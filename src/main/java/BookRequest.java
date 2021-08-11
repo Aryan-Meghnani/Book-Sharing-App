@@ -1,7 +1,7 @@
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class BookRequest implements Comparable<BookRequest>{
+public class BookRequest implements Comparable<BookRequest> {
     BookAndOwner bookAndOwner;
     Member member;
     LocalDateTime date;
@@ -27,6 +27,10 @@ public class BookRequest implements Comparable<BookRequest>{
         return bookAndOwner;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -42,10 +46,10 @@ public class BookRequest implements Comparable<BookRequest>{
 
     @Override
     public int compareTo(BookRequest bookRequest) {
-        if(date.isAfter(bookRequest.date)){
-            return -1;
-        }else if(date.isBefore(bookRequest.date))
+        if (date.isAfter(bookRequest.date)) {
             return 1;
+        } else if (date.isBefore(bookRequest.date))
+            return -1;
         return 0;
     }
 }

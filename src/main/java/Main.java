@@ -1,35 +1,39 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException {
 
-//        List<BookAndOwner> bookAndOwner = new ArrayList<>();
-//        List<BookIssue> bookIssue = new ArrayList<>();
-//        List<BookRequest> bookRequest = new ArrayList<>();
+    public static void main(String[] args) {
         BookService bookManager = new BookManager();
+
+        ScheduledExecutorService es = Executors.newScheduledThreadPool(10);
 
         System.out.println("Hello, Welcome to Book Sharing App: ");
         Scanner sc = new Scanner(System.in);
 
         List<Member> members = bookManager.getMembers();
         Member member;
-        outer: while (true) {
-            member=members.get(0);
+        outer:
+        while (true) {
+            member = members.get(0);
             System.out.println("Enter ID");
-            int memeberid=sc.nextInt();
+            int memeberid = sc.nextInt();
             sc.nextLine();
-            for(Member m: members){
-                if(m.getId()==memeberid)
-                    member=m;
+            for (Member m : members) {
+                if (m.getId() == memeberid)
+                    member = m;
             }
-            inner: while (true) {
+            inner:
+            while (true) {
+
                 System.out.println("1. To Add Books");
                 System.out.println("2. To Show Books");
                 System.out.println("3. To Issue Books");
@@ -45,7 +49,6 @@ public class Main {
                     sc.nextLine();
 
                 } else if (point == 2) {
-//                System.out.println(bookAndOwner);
                     int i = 0;
                     for (BookAndOwner b : bookManager.getBookAndOwners()) {
                         System.out.println(++i + ": " + b);
@@ -57,16 +60,16 @@ public class Main {
                         System.out.println("1. Search By Book Name");
                         System.out.println("2. Search By Author");
                         System.out.println("3. Search By Isbn Number");
-                        int p = sc.nextInt();
+                        int searchBy = sc.nextInt();
                         sc.nextLine();
-                        while (p > 3) {
-                            p = sc.nextInt();
+                        while (searchBy > 3) {
+                            searchBy = sc.nextInt();
                             System.out.println("Incorrect Input: Try Again");
                         }
                         System.out.println("Enter Keyword");
-                        String search = sc.nextLine();
+                        String searchValue = sc.nextLine();
 
-                        List<BookAndOwner> bookAndOwnerFilter = bookManager.search(p, search);
+                        List<BookAndOwner> bookAndOwnerFilter = bookManager.search(searchBy, searchValue);
                         if (bookAndOwnerFilter.isEmpty()) {
                             System.out.println("No Book Found");
                             continue;
@@ -88,15 +91,12 @@ public class Main {
                             int bookAndOwnerFilterIndex = (sc.nextInt()) - 1;
                             sc.nextLine();
                             issueStatus = bookManager.issue(bookAndOwnerFilterIndex, member);
-                        }else
+                        } else
                             continue;
                         System.out.println(issueStatus);
-//                        if(!issueStatus.equals("Book Issued")){
-//                            System.out.println("Enter the block");
-//                            ScheduledExecutorService es=Executors.newScheduledThreadPool(10);
-//
-//                            es.scheduleAtFixedRate(new BookManager(),1,1, SECONDS);
-//                        }
+                        if (!issueStatus.equals("Book Issued")) {
+                            es.scheduleAtFixedRate(new Thread((Runnable) bookManager), 10, 10, SECONDS);
+                        }
                         sc.nextLine();
 
                         System.out.println("1. To Continue");
@@ -108,7 +108,7 @@ public class Main {
                             System.exit(0);
                     }
                 } else if (point == 4) {
-                    List<BookIssue> bookIssues= bookManager.getBookIssues();
+                    List<BookIssue> bookIssues = bookManager.getBookIssues();
                     List<BookIssue> bookIssueFilter = new ArrayList<>();
                     Member finalMember = member;
                     bookIssueFilter = bookIssues.stream().filter(i -> i.getMember().equals(finalMember) && i.getIssueReturnDate().getStatus().contains("Issued")).collect(Collectors.toList());
@@ -125,16 +125,15 @@ public class Main {
                         int p = sc.nextInt();
                         if (p == 1) {
                             System.out.println("1. Return Book at .... Index Number");
-                            //here k is the index of the book that is to be returned
+                            //here bookIssueFilterIndex is the index of the book that is to be returned
                             int bookIssueFilterIndex = (sc.nextInt()) - 1;
                             sc.nextLine();
-                            String returnStatus = bookManager.bookReturn(bookIssueFilter,bookIssueFilterIndex);
+                            String returnStatus = bookManager.bookReturn(bookIssueFilter, bookIssueFilterIndex);
                             System.out.println(returnStatus);
                         } else
                             continue;
                     }
-
-                    sc.nextLine();
+                    System.out.println();
                 } else if (point == 5) {
                     int i = 0;
                     for (BookIssue b : bookManager.getBookIssues()) {
@@ -145,15 +144,15 @@ public class Main {
                 } else if (point == 6) {
                     break;
                 } else if (point == 7) {
-                    int i=0;
+                    int i = 0;
                     PriorityQueue<BookRequest> bookRequest = bookManager.getBookRequests();
-                    for(BookRequest b: bookRequest){
-                        System.out.println(++i +": "+b);
+                    for (BookRequest b : bookRequest) {
+                        System.out.println(++i + ": " + b);
                     }
                     System.out.println();
                     sc.nextLine();
                 } else if (point == 8) {
-//                    es.shutdown();
+                    es.shutdown();
                     System.exit(0);
                 } else {
                     System.out.println("Incorrect Input, Try Again\n");
