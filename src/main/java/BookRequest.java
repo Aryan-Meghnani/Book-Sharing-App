@@ -19,9 +19,6 @@ public class BookRequest implements Comparable<BookRequest> {
                 ", Request Made By " + member;
     }
 
-    public LocalDateTime getDate() {
-        return date;
-    }
 
     public BookAndOwner getBookAndOwner() {
         return bookAndOwner;

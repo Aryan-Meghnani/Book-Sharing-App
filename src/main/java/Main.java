@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Scanner;
@@ -21,14 +20,13 @@ public class Main {
 
         List<Member> members = bookManager.getMembers();
         Member member;
-        outer:
         while (true) {
             member = members.get(0);
             System.out.println("Enter ID");
-            int memeberid = sc.nextInt();
+            int memberid = sc.nextInt();
             sc.nextLine();
             for (Member m : members) {
-                if (m.getId() == memeberid)
+                if (m.getId() == memberid)
                     member = m;
             }
             inner:
@@ -109,7 +107,7 @@ public class Main {
                     }
                 } else if (point == 4) {
                     List<BookIssue> bookIssues = bookManager.getBookIssues();
-                    List<BookIssue> bookIssueFilter = new ArrayList<>();
+                    List<BookIssue> bookIssueFilter;
                     Member finalMember = member;
                     bookIssueFilter = bookIssues.stream().filter(i -> i.getMember().equals(finalMember) && i.getIssueReturnDate().getStatus().contains("Issued")).collect(Collectors.toList());
                     int i = 0;
